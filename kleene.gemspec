@@ -3,18 +3,18 @@
 require_relative "lib/kleene/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "kleene"
-  spec.version = Kleene::VERSION
-  spec.authors = ["David Ellis"]
-  spec.email = ["david@conquerthelawn.com"]
+  spec.name                  = "kleene"
+  spec.version               = Kleene::VERSION
+  spec.authors               = ["David Ellis"]
+  spec.email                 = ["david@conquerthelawn.com"]
 
-  spec.summary = "kleene is a library for building regular expression recognition automata - nfas, dfas, and some specialty structures."
-  spec.description = "kleene is a library for building regular expression recognition automata - nfas, dfas, and some specialty structures.r"
-  spec.homepage = "https://github.com/davidkellis/kleene-rb"
-  spec.license = "MIT"
+  spec.summary               = "kleene is a library for building regular expression recognition automata"
+  spec.description           = "kleene is a library for building regular expression recognition automata - nfas, dfas, and some specialty structures."
+  spec.homepage              = "https://github.com/davidkellis/kleene-rb"
+  spec.license               = "MIT"
   spec.required_ruby_version = ">= 3.0.0"
 
-  spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
+  # spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/davidkellis/kleene-rb"
