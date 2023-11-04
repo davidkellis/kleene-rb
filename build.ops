@@ -7,17 +7,25 @@ imports:
 ...
 
 # when you run this script, it should do something like:
-# ~/sync/projects/kleene-rb
-# ❯ ops run build.ops version:1.0.0
-# Write version.rb for version 1.0.0
-# [localhost] Build gem: gem build opswalrus.gemspec
-# [localhost] Check whether Bitwarden is locked or not: bw status
-# [localhost] Get Rubygems OTP: bw get totp Rubygems
-# [localhost] Push gem: gem push opswalrus-1.0.0.gem
-# [localhost] Build docker image: docker build -t opswalrus/ops:1.0.0 .
-
-# ~/sync/projects/ops/opswalrus on  main via 💎 v3.2.2 took 44s
-
+# ~/sync/projects/kleene-rb on  master via 💎 v3.2.2
+# ❯ ops run build.ops version:0.5.0
+# Write version.rb for version 0.5.0
+# Writing template literal to ./lib/kleene/version.rb
+# localhost | Build gem
+# Finished in 0.181094124 seconds with exit status 0 (success)
+# ********************************************************************************
+# localhost | Commit Gemfile.lock and version.rb and git push changes
+# Finished in 0.798496926 seconds with exit status 0 (success)
+# ********************************************************************************
+# localhost | Check whether Bitwarden is locked or not
+# Finished in 0.008580059 seconds with exit status 0 (success)
+# ********************************************************************************
+# localhost | Get Rubygems OTP
+# Finished in 0.378203313 seconds with exit status 0 (success)
+# ********************************************************************************
+# localhost | Push gem
+# Finished in 4.095049625 seconds with exit status 0 (success)
+# ********************************************************************************
 
 version = params.version
 
