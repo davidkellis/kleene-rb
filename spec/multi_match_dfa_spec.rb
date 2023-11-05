@@ -3,12 +3,12 @@ require_relative "./spec_helper"
 include Kleene
 include DSL
 
-describe "MultiMatchDFA" do
+describe "BatchMultiMatchDFA" do
   it "matches /a.|.b/" do
     alphabet = Kleene::DEFAULT_ALPHABET   # Set['a', 'b', 'z']
     a_dot = seq(literal("a", alphabet), dot(alphabet))   # /a./
     dot_b = seq(dot(alphabet), literal("b", alphabet))   # /.b/
-    mmdfa = MultiMatchDFA.new([a_dot, dot_b])
+    mmdfa = BatchMultiMatchDFA.new([a_dot, dot_b])
 
     input_string = "abzbazaaabzbzbbbb"
 
@@ -46,7 +46,7 @@ describe "MultiMatchDFA" do
   it "matches /a*/" do
     alphabet = Set['a', 'b', 'z']
     a_star = kleene(literal("a", alphabet))
-    mmdfa = MultiMatchDFA.new([a_star])
+    mmdfa = BatchMultiMatchDFA.new([a_star])
 
     input_string = "abaabaaa"
 

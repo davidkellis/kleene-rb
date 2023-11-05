@@ -9,6 +9,7 @@ require_relative "kleene/dsl"
 require_relative "kleene/nfa"
 require_relative "kleene/dfa"
 require_relative "kleene/multi_match_dfa"
+require_relative "kleene/online_dfa"
 
 
 module Kleene

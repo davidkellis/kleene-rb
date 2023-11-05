@@ -1,3 +1,4 @@
+require "stringio"
 require_relative "./kleene"
 
 module Kleene
@@ -11,7 +12,7 @@ module Kleene
     end
   end
 
-  class MultiMatchDFA
+  class OnlineDFA
     include DSL
 
     # @original_nfas : Array(NFA)
@@ -48,6 +49,8 @@ module Kleene
       # create a composite NFA as the union of all the NFAs with epsilon transitions from every NFA state back to the union NFA's start state
       @composite_nfa = create_composite_nfa(@nfas_with_err_state)
       @composite_dfa = @composite_nfa.to_dfa
+
+      reset
     end
 
     def machines_from_nfa(nfa) # : MachineTuple
@@ -77,65 +80,71 @@ module Kleene
 
       nfa
     end
-  end
 
-  class BatchMultiMatchDFA < MultiMatchDFA
-    # #matches(input) is the batch-style matching interface
-    def matches(input) # : Hash(NFA, Array(MatchRef))
-      mt = match_tracker(input)
+    def reset # : OnlineMatchTracker
+      @active_composite_dfa = @composite_dfa.deep_clone
+      @active_candidate_dfas = []
+      @match_tracker = setup_callbacks(@active_composite_dfa)
+      @buffer = ""
+    end
+
+    # #ingest(input) is the online-style matching interface
+    def ingest(input, debug = false) # : Hash(NFA, Array(MatchRef))
+      mt = @match_tracker
+
+      start_index_of_input_fragment_in_buffer = @buffer.length
+
+      input.each_char.with_index do |char, index|
+        @active_composite_dfa.handle_token!(char, start_index_of_input_fragment_in_buffer + index)
+      end
+
+      @buffer << input
 
       start_index_to_nfas_that_may_match = mt.invert_candidate_match_start_positions
 
       mt.empty_matches.each do |nfa_with_dead_err, indices|
         original_nfa = machines_from_nfa_with_dead_err(nfa_with_dead_err).nfa
-        indices.each do |index|
-          mt.add_match(original_nfa, MatchRef.new(input, index...index))
+        indices.select {|index| index >= start_index_of_input_fragment_in_buffer }.each do |index|
+          mt.add_match(original_nfa, MatchRef.new(@buffer, index...index))
         end
       end
 
-      active_dfas = Array.new    # the Int32 represents the start of match
-
       input.each_char.with_index do |char, index|
-        active_dfas.reject! do |active_dfa_tuple|
+        index_in_buffer = start_index_of_input_fragment_in_buffer + index
+
+        @active_candidate_dfas.reject! do |active_dfa_tuple|
           dfa_clone, original_nfa, start_of_match_index = active_dfa_tuple
 
-          dfa_clone.handle_token!(char, index)
-          mt.add_match(original_nfa, MatchRef.new(input, start_of_match_index..index)) if dfa_clone.accept?
+          dfa_clone.handle_token!(char, index_in_buffer)
+          mt.add_match(original_nfa, MatchRef.new(@buffer, start_of_match_index..index_in_buffer)) if dfa_clone.accept?
 
           dfa_clone.error?
         end
 
-        if nfas_with_dead_err = start_index_to_nfas_that_may_match[index]
+        if nfas_with_dead_err = start_index_to_nfas_that_may_match[index_in_buffer]
           nfas_with_dead_err.each do |nfa_with_dead_err|
             machines = machines_from_nfa_with_dead_err(nfa_with_dead_err)
             original_nfa = machines.nfa
             dfa = machines.dfa
             dfa_clone = dfa.shallow_clone
 
-            dfa_clone.handle_token!(char, index)
-            mt.add_match(original_nfa, MatchRef.new(input, index..index)) if dfa_clone.accept?
+            dfa_clone.handle_token!(char, index_in_buffer)
+            mt.add_match(original_nfa, MatchRef.new(@buffer, index_in_buffer..index_in_buffer)) if dfa_clone.accept?
 
-            active_dfas << [dfa_clone, original_nfa, index] unless dfa_clone.error?
+            @active_candidate_dfas << [dfa_clone, original_nfa, index_in_buffer] unless dfa_clone.error?
           end
         end
       end
 
-      mt.matches
+      matches
     end
 
-    def match_tracker(input) # : BatchMatchTracker
-      dfa = @composite_dfa.deep_clone
-      match_tracker = setup_callbacks(dfa)
-
-      input.each_char.with_index do |char, index|
-        dfa.handle_token!(char, index)
-      end
-
-      match_tracker
+    def matches
+      @match_tracker.matches
     end
 
     def setup_callbacks(dfa)
-      match_tracker = BatchMatchTracker.new
+      match_tracker = OnlineMatchTracker.new
 
       # 1. identify DFA states that correspond to successful match of first character of the NFAs
       epsilon_closure_of_nfa_start_state = composite_nfa.epsilon_closure(composite_nfa.start_state)
@@ -227,7 +236,7 @@ module Kleene
     end
   end
 
-  class BatchMatchTracker
+  class OnlineMatchTracker
     # The NFA keys in the following two structures are not the original NFAs supplied to the MultiMatchDFA.
     # They are the original NFAs that have been augmented with a dead end error state, so the keys are objects that
     # are the internal state of a MultiMatchDFA
