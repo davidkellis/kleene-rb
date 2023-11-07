@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    kleene (0.6.0)
+    kleene (0.7.0)
       activesupport (~> 7.1)
       regexp_parser (~> 2.8)
 

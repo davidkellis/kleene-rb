@@ -12,14 +12,12 @@ module Enumerable
     ary = []
     each do |e|
       v = block.call(e)
-      unless v.nil?
-        ary << v
-      end
+      ary << v unless v.nil?
     end
     ary
   end
 
-  alias_method :includes?, :include?
+  alias includes? include?
 end
 
 class String

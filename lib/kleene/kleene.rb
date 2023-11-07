@@ -1,8 +1,8 @@
 # this is a port and extension of https://github.com/davidkellis/kleene/
 
-require_relative "./dsl"
-require_relative "./nfa"
-require_relative "./dfa"
+require_relative './dsl'
+require_relative './nfa'
+require_relative './dfa'
 
 module Kleene
   # The default alphabet consists of the following:
@@ -27,7 +27,6 @@ module Kleene
     def self.new_error_state(final = false)
       State.new(final, true)
     end
-
 
     attr_reader :id # : Int32
     attr_accessor :final # : Bool
@@ -76,13 +75,11 @@ module Kleene
     end
 
     def ==(other)
-      @string == other.string &&
-      @range == other.range
+      @string == other.string && @range == other.range
     end
 
     def eql?(other)
       self == other
     end
   end
-
 end

@@ -1,0 +1,14 @@
+AllCops:
+  StyleGuideBaseURL: https://rubystyle.guide
+
+Layout/SpaceInsideBlockBraces:
+  SpaceBeforeBlockParameters: false
+
+Layout/LineLength:
+  Max: 160
+
+Style/AccessorGrouping:
+  EnforcedStyle: separated
+
+Style/Encoding:
+  Enabled: true
