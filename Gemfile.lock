@@ -3,6 +3,7 @@ PATH
   specs:
     kleene (0.6.0)
       activesupport (~> 7.1)
+      regexp_parser (~> 2.8)
 
 GEM
   remote: https://rubygems.org/

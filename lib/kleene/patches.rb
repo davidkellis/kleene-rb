@@ -21,3 +21,9 @@ module Enumerable
 
   alias_method :includes?, :include?
 end
+
+class String
+  def scan_matches(pattern) # : Array(MatchData)
+    to_enum(:scan, pattern).map { Regexp.last_match }
+  end
+end
