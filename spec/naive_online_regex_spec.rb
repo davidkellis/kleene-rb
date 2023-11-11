@@ -113,7 +113,7 @@ describe NaiveOnlineRegex do
     noregex.ingest('k').map(&:to_h).should eq([])
     noregex.matches.map {|k, v| [[k, v.map(&:to_h)]].to_h }.reduce(&:merge).should eq({
                                                                                         /abc/ => [],
-                                                                                        /def/ => [{ /def/ => ['def'], :offsets => [3, 6] }]
+                                                                                        /def/ => [{ /def/ => ['def'], :offsets => [2, 5] }]
                                                                                       })
   end
 
@@ -125,8 +125,35 @@ describe NaiveOnlineRegex do
                                                                      { /def/ => ['def'], :offsets => [5, 8] }
                                                                    ])
     noregex.matches.map {|k, v| [[k, v.map(&:to_h)]].to_h }.reduce(&:merge).should eq({
-                                                                                        /abc/ => [{ /abc/ => ['abc'], :offsets => [19, 22] }],
+                                                                                        /abc/ => [{ /abc/ => ['abc'], :offsets => [7, 10] }],
                                                                                         /def/ => []
                                                                                       })
+  end
+end
+
+describe OnlineMatch do
+  describe "#clone" do
+    it "makes a deep clone s.t. (such that) offsets are independent" do
+      regex = /def/
+      match = regex.match "abcdefg"
+      online_match = OnlineMatch.new(regex, match)
+
+      online_match.offsets.should eq([3, 6])
+
+      online_match2 = online_match.clone
+
+      online_match.offsets.should eq([3, 6])
+      online_match2.offsets.should eq([3, 6])
+
+      online_match.decrement_offsets(3)
+
+      online_match.offsets.should eq([0, 3])
+      online_match2.offsets.should eq([3, 6])
+
+      online_match2.decrement_offsets(1)
+
+      online_match.offsets.should eq([0, 3])
+      online_match2.offsets.should eq([2, 5])
+    end
   end
 end

@@ -49,22 +49,33 @@ module Kleene
     end
 
     def drop_matches_that_have_rolled_off(number_of_chars_at_front_of_buffer_that_rolled_off)
-      @matches_per_regex.each do |regex, match_set|
-        match_set.reject! {|online_match| online_match.offsets.first < number_of_chars_at_front_of_buffer_that_rolled_off }
+      @matches_per_regex.transform_values! do |match_set|
+        new_set = Set.new
+        match_set.each do |online_match|
+          online_match_clone = online_match.clone
+          online_match_clone.decrement_offsets(number_of_chars_at_front_of_buffer_that_rolled_off)
+          new_set << online_match_clone if online_match_clone.offsets.first > 0
+        end
+        new_set
       end
+
     end
   end
 
   # A {Regexp, MatchData} pair
   class OnlineMatch
-    # Regexp  # MatchData  # Array(Int) -> [start, end]    # excludes the end offset
-    attr_reader :regex
-    attr_reader :match
-    attr_reader :offsets # Regexp  # MatchData  # Array(Int) -> [start, end]    # excludes the end offset
+    attr_reader :regex # Regexp
+    attr_reader :match # MatchData
+    attr_reader :offsets # Array(Int) -> [start, end]    # excludes the end offset
 
     def initialize(regex, match)
-      @regex, @match, @offsets = regex, match
+      @regex = regex
+      @match = match
       @offsets = match.offset(0)
+    end
+
+    def clone
+      OnlineMatch.new(@regex, @match)
     end
 
     def identity
@@ -97,6 +108,10 @@ module Kleene
 
     def [](*args)
       @match.method(:[]).call(*args)
+    end
+
+    def decrement_offsets(decrement)
+      @offsets = @offsets.map {|offset| offset - decrement }
     end
   end
 end
